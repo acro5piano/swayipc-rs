@@ -11,8 +11,12 @@ use std::os::unix::net::UnixStream;
 pub struct Connection(UnixStream);
 
 impl Connection {
-    pub fn new() -> Fallible<Self> {
-        Ok(Self(UnixStream::connect(get_path()?)?))
+    pub fn new(path: Option<String>) -> Fallible<Self> {
+        let real_path = match path {
+            Some(p) => p,
+            _ => get_path()?,
+        };
+        Ok(Self(UnixStream::connect(real_path)?))
     }
 
     pub(crate) fn raw_command<D: Deserialize>(
